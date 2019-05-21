@@ -31,4 +31,4 @@ commonName_default		= {{CA_HOSTNAME}}
 keyUsage                = critical,digitalSignature,keyEncipherment
 extendedKeyUsage        = serverAuth,clientAuth
 subjectKeyIdentifier    = hash
-subjectAltName          = $ENV::SAN
+subjectAltName          = {{CA_SAN}}

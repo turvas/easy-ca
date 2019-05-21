@@ -109,7 +109,12 @@ cp -r ${BIN_DIR}/templates bin/
 
 popd > /dev/null
 
-echo
-echo "Signing sub-CA initialized."
-echo
+if [ -f "$CA_DIR/ca/ca.crt" ]; then
+	echo
+	echo "Signing sub-CA initialized."
+	echo
+else
+	echo ERROR, sub-CA creation failed
+	exit 1
+fi
 

@@ -68,7 +68,7 @@ export CA_PASS=${PASS}
 
 # Generate the server openssl config
 export CA_HOSTNAME=${SERVER_NAME}
-export SAN=${ALT_NAME}
+export CA_SAN=${ALT_NAME}
 template "${BIN_DIR}/templates/server.tpl" "conf/${SAFE_NAME}.server.conf"
 
 # Create the server key and csr
@@ -89,7 +89,11 @@ openssl ca -batch -notext \
 
 popd > /dev/null
 
-echo
-echo "Server certificate created."
-echo
-
+if [ -f "private/${SAFE_NAME}.server.key" ]; then
+	echo
+	echo "Server certificate created."
+	echo
+else
+	echo ERROR: Cert creation failed
+	exit 1
+fi
