@@ -37,6 +37,7 @@ template() {
     for VAR in ${!CA_*}; do
         REGEX="${REGEX}s#{{\s*${VAR}\s*}}#${!VAR}#g; "
     done
+    #echo sed REGEX=$REGEX
     sed -e "${REGEX}" < $1 > $2
 }
 

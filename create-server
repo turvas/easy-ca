@@ -61,23 +61,37 @@ if [ -f conf/${SAFE_NAME}.server.conf ]; then
     exit 1
 fi
 
-echo -n "Enter passphase for signing CA key: "
-read -s PASS
-echo
-export CA_PASS=${PASS}
-
+if [ -z $CA_PASS ]; then
+        echo -n "Enter passphase for signing CA key: "
+        read -s PASS
+        echo
+        export CA_PASS=${PASS}
+fi
 # Generate the server openssl config
 export CA_HOSTNAME=${SERVER_NAME}
 export CA_SAN=${ALT_NAME}
 template "${BIN_DIR}/templates/server.tpl" "conf/${SAFE_NAME}.server.conf"
 
+echo Starting request/CSR creations
+if [ $SHLVL > 1 ]; then         # if called by other script
+        BATCH='-batch'
+fi
 # Create the server key and csr
-openssl req -new -nodes \
+openssl req -new -nodes $BATCH \
             -config conf/${SAFE_NAME}.server.conf \
             -keyout private/${SAFE_NAME}.server.key \
             -out csr/${SAFE_NAME}.server.csr
+if [ $? -gt 0 ]; then
+        echo ERROR: CSR or Key generaytion failed
+        exit 1
+fi
 chmod 0400 private/${SAFE_NAME}.server.key
 
+if [ ! -f csr/${SAFE_NAME}.server.csr ] || [ ! -f private/${SAFE_NAME}.server.key ]; then
+        echo no CSR found: csr/${SAFE_NAME}.server.csr 
+        exit 1
+fi
+echo Starting signing..
 # Create the server certificate
 openssl ca -batch -notext \
            -config conf/ca.conf \
@@ -87,14 +101,14 @@ openssl ca -batch -notext \
            -extensions server_ext \
            -passin env:CA_PASS
 
-popd > /dev/null
-
-if [ -f "private/${SAFE_NAME}.server.key" ]; then
+if [ $? -eq 0 ] && [ -f "private/${SAFE_NAME}.server.key" ]; then
 	echo
-	echo "Server certificate created."
+	echo "Server certificate created in ${BIN_DIR}/../certs"
 	echo
+        popd > /dev/null
 else
-   echo ERROR: Cert creation failed
+   echo "ERROR: Cert creation (signing) failed!"
+        popd > /dev/null
    exit 1
 fi
 
