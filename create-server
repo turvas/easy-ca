@@ -89,7 +89,12 @@ openssl ca -batch -notext \
 
 popd > /dev/null
 
-echo
-echo "Server certificate created."
-echo
+if [ -f "private/${SAFE_NAME}.server.key" ]; then
+	echo
+	echo "Server certificate created."
+	echo
+else
+   echo ERROR: Cert creation failed
+   exit 1
+fi
 
