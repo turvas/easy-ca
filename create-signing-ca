@@ -55,7 +55,6 @@ fi
 export CA_PASS=${PASS1}
 
 echo
-
 echo -n "Enter passphase for root CA key: "
 read -s PARENT_PASS
 echo
