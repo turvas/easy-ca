@@ -69,6 +69,7 @@ fi
 # Generate the server openssl config
 export CA_HOSTNAME=${SERVER_NAME}
 export CA_SAN=${ALT_NAME}
+export SAN=${ALT_NAME}
 template "${BIN_DIR}/templates/server.tpl" "conf/${SAFE_NAME}.server.conf"
 
 echo Starting request/CSR creations
