@@ -1,6 +1,9 @@
 #!/bin/bash
 # Derek Moore <derek.moore@gmail.com>
 
+# Break on error
+set -e
+
 usage() {
     echo "Usage: $0 -d CA_DIR"
     echo "Initializes a new signing sub-CA in CA_DIR"
@@ -64,6 +67,9 @@ export CA_PARENT_PASS=${PARENT_PASS}
 HOME=$( cd "${HOME}" && pwd )
 
 pushd ${HOME} > /dev/null
+
+# some script needs it to exist
+export SAN=""
 
 # Generate the signing CA openssl config
 template "${BIN_DIR}/templates/signing.tpl" "conf/ca.conf"
