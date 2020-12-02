@@ -1,6 +1,9 @@
 #!/bin/bash
 # Derek Moore <derek.moore@gmail.com>
 
+# break on errors
+set -e
+
 usage() {
     echo "Usage: $0 -d CA_DIR"
     echo "Initializes a new root CA in CA_DIR"
@@ -57,18 +60,26 @@ pushd ${HOME} > /dev/null
 
 # Generate the root CA openssl config
 template "${BIN_DIR}/templates/root.tpl" "conf/ca.conf"
-
+echo PWD=`pwd`
+echo
+echo Generating CA key
 # Create the root CA csr
 openssl genrsa -out ca/private/ca.key -passout env:CA_PASS 4096
 chmod 0400 ca/private/ca.key
 
+# some script needs this to exist
+export SAN=""
+
+echo
+echo Generating CA CSR..
 # Create the root CA csr
 openssl req -new -batch \
             -config conf/ca.conf \
             -key ca/private/ca.key \
             -out ca/ca.csr \
             -passin env:CA_PASS
-
+echo
+echo SelfSigning CA cert..
 # Create the root CA certificate
 openssl ca -selfsign -batch -notext \
            -config conf/ca.conf \
@@ -77,12 +88,14 @@ openssl ca -selfsign -batch -notext \
            -days 3652 \
            -extensions root_ca_ext \
            -passin env:CA_PASS
-
+echo
+echo Creating CRL..
 # Create the root CRL
 openssl ca -gencrl -batch \
            -config conf/ca.conf \
            -out crl/ca.crl
-
+echo
+echo Replicate the existing binary directory..
 # Replicate the existing binary directory
 for BIN in ${BINARIES}; do
     cp ${BIN_DIR}/${BIN} bin/
@@ -91,7 +104,12 @@ cp -r ${BIN_DIR}/templates bin/
 
 popd > /dev/null
 
-echo
-echo "Root CA initialized."
-echo
+if [ -f "$CA_DIR/ca/ca.crt" ]; then
+        echo
+        echo "Root CA initialized."
+        echo
+else
+   echo ERROR, root-CA creation failed
+   exit 1
+fi
 
