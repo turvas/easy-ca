@@ -41,12 +41,12 @@ if [ -f conf/${SAFE_NAME}.client.conf ]; then
     echo "Configuration already exists for '${CLIENT_NAME}', exiting."
     exit 1
 fi
-
-echo -n "Enter passphase for signing CA key: "
-read -s PASS
-echo
-export CA_PASS=${PASS}
-
+if [ -z $CA_PASS ]; then
+        echo -n "Enter passphase for signing CA key: "
+        read -s PASS
+        echo
+        export CA_PASS=${PASS}
+fi
 # Generate the client cert openssl config
 export SAN=""
 export CA_USERNAME=${CLIENT_NAME}
