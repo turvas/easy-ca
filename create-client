@@ -54,8 +54,12 @@ export SAN=""
 export CA_USERNAME=${CLIENT_NAME}
 template "${BIN_DIR}/templates/client.tpl" "conf/${SAFE_NAME}.client.conf"
 
-# Create the client key and csr
-openssl req -new -nodes \
+echo Starting request/CSR creations
+if [ $SHLVL > 1 ]; then         # if called by other script
+        BATCH='-batch'
+fi
+# Create the server key and csr
+openssl req -new -nodes $BATCH \
             -config conf/${SAFE_NAME}.client.conf \
             -keyout private/${SAFE_NAME}.client.key \
             -out csr/${SAFE_NAME}.client.csr
@@ -70,9 +74,13 @@ openssl ca -batch -notext \
            -extensions client_ext \
            -passin env:CA_PASS
 
-popd > /dev/null
-
-echo
-echo "Client certificate created."
-echo
-
+if [ $? -eq 0 ] && [ -f "private/${SAFE_NAME}.client.key" ]; then
+        echo
+        echo "Client certificate created in ${BIN_DIR}/../certs"
+        echo
+        popd > /dev/null
+else
+   echo "ERROR: Cert creation (signing) failed!"
+        popd > /dev/null
+   exit 1
+fi
