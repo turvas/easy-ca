@@ -100,7 +100,7 @@ openssl ca -batch -notext \
            -extensions server_ext \
            -passin env:CA_PASS
 
-if [ $? -eq 0 ] && [ -f "private/${SAFE_NAME}.server.key" ]; then
+if [ $? -eq 0 ] && [ -f "certs/${SAFE_NAME}.server.crt" ]; then
 	echo
 	echo "Server certificate created in ${BIN_DIR}/../certs"
 	echo
