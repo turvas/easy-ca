@@ -65,6 +65,11 @@ openssl req -new -nodes $BATCH \
             -out csr/${SAFE_NAME}.client.csr
 chmod 0400 private/${SAFE_NAME}.client.key
 
+if [ ! -f csr/${SAFE_NAME}.client.csr ] || [ ! -f private/${SAFE_NAME}.client.key ]; then
+        echo no key or CSR found: csr/${SAFE_NAME}.client.csr
+        exit 1
+fi
+
 # Create the client certificate
 openssl ca -batch -notext \
            -config conf/ca.conf \
@@ -74,7 +79,7 @@ openssl ca -batch -notext \
            -extensions client_ext \
            -passin env:CA_PASS
 
-if [ $? -eq 0 ] && [ -f "private/${SAFE_NAME}.client.key" ]; then
+if [ $? -eq 0 ] && [ -f "certs/${SAFE_NAME}.client.crt" ]; then
         echo
         echo "Client certificate created in ${BIN_DIR}/../certs"
         echo
